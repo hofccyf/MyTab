@@ -19,12 +19,12 @@ export default {
     const MY_PASSWORD = "admin"; 
     /* ========================================================= */
 
-    // === API: 音乐跨域代理 - 搜索列表 ===
+    // === API: 音乐跨域 - 搜索列表 ===
     if (url.pathname === '/api/music') {
         try {
             const source  = url.searchParams.get('source')  || 'kuwo'; // 默认为酷我，音乐源: netease、kuwo、joox、bilibili，如需修改需要与可调参数5一起修改
-            const keyword = url.searchParams.get('keyword') || '洋澜一'; // 默认搜索歌手洋澜一
-            const count   = url.searchParams.get('count')   || '18'; // 默认搜索18首歌曲，不要超过49首，API有50次/5分限制
+            const keyword = url.searchParams.get('keyword') || '洋澜一';  // 默认搜索歌手洋澜一
+            const count   = url.searchParams.get('count')   || '18';  // 默认搜索18首歌曲，不要超过49首，API有50次/5分限制
             let tracks = [];
 
             try {
@@ -37,7 +37,6 @@ export default {
                 tracks = await res.json();
                 if (!Array.isArray(tracks) || tracks.length === 0) throw new Error('empty');
             } catch(e) {
-                // 备用API：网易云官方底层接口
                 const fetchCount = Math.min(parseInt(count) * 3, 100);
                 const searchBody = `s=${encodeURIComponent(keyword)}&type=1&limit=${fetchCount}&offset=0`;
                 const fbRes = await fetch('https://music.163.com/api/cloudsearch/pc', {
@@ -195,7 +194,7 @@ export default {
         } catch(e) { return new Response(JSON.stringify({ success: false, data: [] }), { headers: { 'content-type': 'application/json' } }); }
     }
 
-    // === 新增：图标中转代理 (解决大陆无法抓取图标问题) ===
+    // === 新增：图标中转 (解决大陆无法抓取图标问题) ===
     if (url.pathname === '/api/icon') {
         const domain = url.searchParams.get('domain');
         if (!domain) return new Response(null, { status: 404 });
@@ -236,14 +235,99 @@ export default {
 
     let userConfig = await env.DB.get('config', { type: 'json' });
     if (!userConfig) {
+      // 默认配置区域：
       userConfig = {
-        bgType: 'url', bg: "https://699db746f9006b5d3258bca9.imgix.net/blue003.jpg",
-        geo: { name: "Auto", lat: null, lng: null },
-        apps: [ { name: "Google", url: "https://www.google.com", icon: "https://www.google.com/favicon.ico" } ], apps2: [], 
-        dock: [ { name: "YouTube", url: "https://www.youtube.com", icon: "https://www.youtube.com/s/desktop/1315588c/img/favicon_144x144.png" } ],
-        widgets1: [ { id: "w_cal1", type: "calendar" }, { id: "w_stk1", type: "stock" } ], widgets2: []
+        "bg": "https://up.deskcity.org/pic_source/96/76/a9/9676a99be6ef40d7502c1e63686d719a.jpg",
+        "bgType": "url",
+        "geo": { "name": "北京市", "lat": 39.9075, "lng": 116.39723 },
+        
+        "apps": [
+            { "name": "北京天气",
+      "url": "https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=1&tn=50000211_hao_pg&wd=%E5%8C%97%E4%BA%AC%E4%B8%80%E5%91%A8%E5%A4%A9%E6%B0%94%E9%A2%84%E6%8A%A5&oq=%25E5%258C%2597%25E4%25BA%25AC%25E4%25B8%2580%25E5%2591%25A8%25E5%25A4%25A9%25E6%25B0%2594%25E9%25A2%2584%25E6%258A%25A5&rsv_pq=b47727f00002b1ff&rsv_t=622aCyx9KTFfcsQfSq2wzrXLwJxawVw6Gr6t2b5T8ag24%2B642vbCKKDdP5tJcTxcZLu3jokX&rqlang=cn&rsv_enter=1&rsv_dl=tb&rsv_btype=t&inputT=4419&rsv_sug2=0&rsv_sug3=7&rsv_sug4=4419",
+      "icon": "https://gips2.baidu.com/it/u=774360462,2913253781&fm=3074&app=3074&f=JPEG?w=600&h=570&type=normal&func=" },
+            { "name": "老王导航", "url": "https://nav.eooce.com/", "icon": "https://dl.zhutix.net/2020/07/Edge.png" },
+            { "name": "ItDog", "url": "https://www.itdog.cn/", "icon": "/api/icon?domain=www.itdog.cn" },
+            { "name": "Ping0", "url": "https://ping0.cc/", "icon": "https://www.bunian.cn/wp-content/uploads/2023/04/t01523872680a051fcc.png" },
+            { "name": "Iplark", "url": "https://iplark.com/", "icon": "/api/icon?domain=iplark.com" },
+            { "name": "Ip.skk", "url": "https://ip.skk.moe/", "icon": "https://q0.itc.cn/q_70/images01/20240221/2c4a4a9282bb4b7cadb57af37699b3e6.jpeg" },
+            { "name": "Ip.sb", "url": "https://ip.sb/", "icon": "/api/icon?domain=ip.sb" },
+            { "name": "Ip138", "url": "https://www.ip138.com/", "icon": "/api/icon?domain=ip138.com" },
+            { "name": "单线程测速", "url": "https://openspeedtest.com/", "icon": "/api/icon?domain=openspeedtest.com" },
+            { "name": "Speed", "url": "https://www.speedtest.net/", "icon": "https://img0.baidu.com/it/u=4150073090,3473839108&fm=253&fmt=auto&app=138&f=PNG?w=500&h=500" },
+            { "name": "Gg-speed", "url": "https://fiber.google.com/speedtest/", "icon": "/api/icon?domain=fiber.google.com" },
+            { "name": "Fast", "url": "https://fast.com/", "icon": "/api/icon?domain=fast.com" },
+            { "name": "驱动之家", "url": "https://www.mydrivers.com/", "icon": "/api/icon?domain=www.mydrivers.com" },
+            { "name": "淘宝", "url": "https://www.taobao.com/", "icon": "/api/icon?domain=www.taobao.com" },
+            { "name": "京东", "url": "https://www.jd.com/", "icon": "/api/icon?domain=www.jd.com" },
+            { "name": "东方财富", "url": "https://www.eastmoney.com/", "icon": "/api/icon?domain=www.eastmoney.com" },
+            { "name": "必应翻译", "url": "https://cn.bing.com/translator/", "icon": "/api/icon?domain=cn.bing.com" },
+            { "name": "谷歌翻译", "url": "https://translate.google.com/", "icon": "/api/icon?domain=translate.google.com" },
+            { "name": "千问", "url": "https://www.qianwen.com/", "icon": "https://img.pipers.cn/images/2024/05/23/1.png" },
+            { "name": "豆包", "url": "https://www.doubao.com/chat/", "icon": "/api/icon?domain=www.doubao.com" },
+            { "name": "Z.ai", "url": "https://chat.z.ai/", "icon": "/api/icon?domain=chat.z.ai" },
+            { "name": "Proton", "url": "https://account.proton.me/", "icon": "/api/icon?domain=account.proton.me" },
+            { "name": "Outlook", "url": "https://outlook.live.com/", "icon": "/api/icon?domain=outlook.live.com" },
+            { "name": "临时邮箱-01", "url": "https://etempmail.com/", "icon": "https://q6.itc.cn/q_70/images03/20241020/43689ec6ab4145ed92eca37bb9529c64.jpeg" },
+            { "name": "临时邮箱-02", "url": "https://mail.td/zh", "icon": "/api/icon?domain=mail.td" },
+            { "name": "CF", "url": "https://www.cloudflare.com/zh-cn/", "icon": "/api/icon?domain=www.cloudflare.com" },
+            { "name": "腾讯云-Edge", "url": "https://console.tencentcloud.com/edgeone", "icon": "/api/icon?domain=console.tencentcloud.com" },
+            { "name": "Cloudns", "url": "https://www.cloudns.net/", "icon": "/api/icon?domain=www.cloudns.net" },
+            { "name": "Now-dns", "url": "https://now-dns.com/", "icon": "/api/icon?domain=now-dns.com" },
+            { "name": "Duckdns", "url": "https://www.duckdns.org/", "icon": "/api/icon?domain=www.duckdns.org" },
+            { "name": "科学IP地址检测", "url": "https://check.proxyip.cmliussss.net/", "icon": "https://d00.paixin.com/thumbs/2550757/29226711/staff_1024.jpg" },
+            { "name": "计划任务", "url": "https://console.cron-job.org/", "icon": "/api/icon?domain=console.cron-job.org" },
+            { "name": "Freecloud", "url": "https://web.freecloud.ltd/index.php", "icon": "https://img95.699pic.com/xsj/0d/wo/bk.jpg!/fh/300" },
+            { "name": "Webhost", "url": "https://www.webhostmost.com/", "icon": "/api/icon?domain=www.webhostmost.com" },
+            { "name": "Fofa", "url": "https://fofa.info/", "icon": "https://t7.baidu.com/it/u=3516590855,270566919&fm=193" },
+            { "name": "听音乐", "url": "https://music.gdstudio.xyz/", "icon": "https://t8.baidu.com/it/u=332885250,1187186536&fm=193" },
+            { "name": "好好看电影", "url": "https://www.hhkan0.com/", "icon": "https://t9.baidu.com/it/u=366578413,3757481342&fm=193" },
+            { "name": "Cm-电影", "url": "https://cmoontv.dedyn.io/", "icon": "https://t9.baidu.com/it/u=366578413,3757481342&fm=193" }
+        ],
+        "dock": [
+            { "name": "Google", "url": "https://www.google.com/", "icon": "/api/icon?domain=www.google.com" },
+            { "name": "Youtube", "url": "https://www.youtube.com/", "icon": "/api/icon?domain=www.youtube.com" },
+            { "name": "Perplexity", "url": "https://www.perplexity.ai/", "icon": "/api/icon?domain=www.perplexity.ai" },
+            { "name": "Gemini", "url": "https://gemini.google.com/", "icon": "/api/icon?domain=gemini.google.com" },
+            { "name": "Chatgpt", "url": "https://chatgpt.com/", "icon": "/api/icon?domain=chatgpt.com" },
+            { "name": "Github", "url": "https://github.com/", "icon": "/api/icon?domain=github.com" },
+            { "name": "X", "url": "https://x.com/", "icon": " /api/icon?domain=x.com" }
+        ],
+        "apps2": [],
+        "widgets1": [],
+        "widgets2": [
+       {
+       "id": "w_1771777452637",
+       "type": "music"
+       },
+       {
+        "id": "w_1771767859698",
+        "type": "rtnews"
+      },
+      {
+        "id": "w_1771765507732",
+        "type": "history"
+      },
+      {
+        "id": "w_1771765546213",
+        "type": "stock"
+      },
+      {
+        "id": "w_1772082290160",
+        "type": "calendar"
+      },
+      {
+      "id": "w_1771765553522",
+      "type": "translator"
+      },
+      {
+        "id": "w_1771765536773",
+        "type": "calculator"
+      }
+      ]
       };
     }
+    
+    // 兼容旧数据的逻辑保留，但因为我们已经完整初始化了，这里不会触发
     if (!userConfig.apps && userConfig.links) { userConfig.apps = userConfig.links; userConfig.dock = []; }
     if (!userConfig.apps2) userConfig.apps2 = [];
     if (!userConfig.widgets1) userConfig.widgets1 = [];
@@ -647,11 +731,11 @@ function renderHtml(config) {
         /* ===================================================================== */
 
         const engines = {
-            google: { name: "Google", url: "https://www.google.com/search", param: "q", icon: "https://www.google.com/favicon.ico", placeholder: "Google..." },
             baidu:  { name: "Baidu",   url: "https://www.baidu.com/s",        param: "wd", icon: "https://www.baidu.com/favicon.ico", placeholder: "百度一下..." },
+            google: { name: "Google", url: "https://www.google.com/search", param: "q", icon: "https://www.google.com/favicon.ico", placeholder: "Google..." },
             bing:   { name: "Bing",   url: "https://www.bing.com/search",    param: "q", icon: "https://www.bing.com/favicon.ico", placeholder: "Bing..." }
         };
-        let currentEngineKey = localStorage.getItem('myTab_engine') || 'google';
+        let currentEngineKey = localStorage.getItem('myTab_engine') || 'baidu';
 
         function init() {
             try { document.body.style.backgroundImage = "url('" + (config.bg || '') + "')"; } catch(e){}
@@ -1166,15 +1250,7 @@ function renderHtml(config) {
             if(!name || !url) return alert('请填写名称和链接');
             if(!url.startsWith('http')) url = 'https://' + url;
             let icon = document.getElementById('new-icon-preview').src;
-            
-            // === 修改核心：如果没有手动上传或填写图片链接，则使用我们自己后端的 /api/icon 接口代理抓取 ===
-            if(!document.getElementById('new-icon-file').files.length && !document.getElementById('new-icon-url').value && document.getElementById('edit-icon-state').value==='add') {
-                let host = '';
-                try { host = new URL(url).hostname; } catch(e) { host = url; }
-                // 使用自己的 Worker 代理，解决大陆无法直接访问 Google Favicon 问题
-                icon = \`/api/icon?domain=\${host}\`;
-            }
-            
+            if(!document.getElementById('new-icon-file').files.length && !document.getElementById('new-icon-url').value && document.getElementById('edit-icon-state').value==='add') icon = \`https://www.google.com/s2/favicons?sz=64&domain=\${new URL(url).hostname}\`;
             const item = {name, url, icon};
             if(document.getElementById('edit-icon-state').value==='add') { 
                 const tgt = document.getElementById('new-icon-target').value;
