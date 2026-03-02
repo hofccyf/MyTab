@@ -237,7 +237,7 @@ export default {
     if (!userConfig) {
       // 默认配置区域：
       userConfig = {
-        "bg": "https://bsyimg.luoca.net/imgtc/20260302/9676a99be6ef40d7502c1e63686d719a.webp",
+        "bg": "https://cdn4.winhlb.com/2026/03/02/69a5842093b0b.jpg",
         "bgType": "url",
         "geo": { "name": "北京市", "lat": 39.9075, "lng": 116.39723 },
         
@@ -1308,4 +1308,5 @@ function renderHtml(config) {
 </html>
   `;
 }
+
 
