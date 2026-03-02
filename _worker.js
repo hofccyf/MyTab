@@ -31,9 +31,9 @@ export default {
                 const res = await Promise.race([
                     fetch(`https://music-api.gdstudio.xyz/api.php?types=search&source=${source}&name=${encodeURIComponent(keyword)}&count=${count}`,
                         { headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://music-api.gdstudio.xyz/' } }),
-                    new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 5000))
+                    new Promise((_, r) => setTimeout(() => r(new 错误('timeout')), 5000))
                 ]);
-                if (!res.ok) throw new Error(`search ${res.status}`);
+                if (!res.ok) throw new 错误(`search ${res.status}`);
                 tracks = await res.json();
                 if (!Array.isArray(tracks) || tracks.length === 0) throw new Error('empty');
             } catch(e) {
@@ -52,9 +52,9 @@ export default {
                 const fbData = await fbRes.json();
                 if (fbData && fbData.result && fbData.result.songs) {
                     tracks = fbData.result.songs
-                        .filter(song => song.fee === 0 || song.fee === 8)
-                        .slice(0, parseInt(count))
-                        .map(song => ({
+                        。filter(song => song.fee === 0 || song.fee === 8)
+                        。slice(0, parseInt(count))
+                        。map(song => ({
                             id:      song.id,
                             name:    song.name,
                             artist:  song.ar ? song.ar.map(a => a.name).join(' / ') : '未知',
@@ -237,7 +237,7 @@ export default {
     if (!userConfig) {
       // 默认配置区域：
       userConfig = {
-        "bg": "https://up.deskcity.org/pic_source/96/76/a9/9676a99be6ef40d7502c1e63686d719a.jpg",
+        "bg": "https://bsyimg.luoca.net/imgtc/20260302/9676a99be6ef40d7502c1e63686d719a.webp",
         "bgType": "url",
         "geo": { "name": "北京市", "lat": 39.9075, "lng": 116.39723 },
         
@@ -1308,3 +1308,4 @@ function renderHtml(config) {
 </html>
   `;
 }
+
