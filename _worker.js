@@ -237,7 +237,7 @@ export default {
     if (!userConfig) {
       // 默认配置区域：
       userConfig = {
-        "bg": "https://cdn4.winhlb.com/2026/03/02/69a5842093b0b.jpg",
+        "bg": "https://cdn4.winhlb.com/2026/03/18/69b98efca79c6.jpg",
         "bgType": "url",
         "geo": { "name": "北京市", "lat": 39.9075, "lng": 116.39723 },
         
@@ -281,7 +281,7 @@ export default {
             { "name": "Fofa", "url": "https://fofa.info/", "icon": "https://t7.baidu.com/it/u=3516590855,270566919&fm=193" },
             { "name": "听音乐", "url": "https://music.gdstudio.xyz/", "icon": "https://t8.baidu.com/it/u=332885250,1187186536&fm=193" },
             { "name": "好好看电影", "url": "https://www.hhkan0.com/", "icon": "https://t9.baidu.com/it/u=366578413,3757481342&fm=193" },
-            { "name": "Cm-电影", "url": "https://cmoontv.dedyn.io/", "icon": "https://t9.baidu.com/it/u=366578413,3757481342&fm=193" }
+            { "name": "影视无限", "url": "https://libretv.xiaohanys.top/", "icon": "https://t9.baidu.com/it/u=366578413,3757481342&fm=193" }
         ],
         "dock": [
             { "name": "Google", "url": "https://www.google.com/", "icon": "/api/icon?domain=www.google.com" },
@@ -291,7 +291,7 @@ export default {
             { "name": "Chatgpt", "url": "https://chatgpt.com/", "icon": "/api/icon?domain=chatgpt.com" },
             { "name": "Github", "url": "https://github.com/", "icon": "/api/icon?domain=github.com" },
             { "name": "X", "url": "https://x.com/", "icon": " /api/icon?domain=x.com" }
-        ],
+        ]，
         "apps2": [],
         "widgets1": [],
         "widgets2": [
