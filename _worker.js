@@ -92,7 +92,7 @@ export default {
                 if (!res.ok) throw new Error(`url ${res.status}`);
                 const data = await res.json();
                 if (!data.url) throw new Error('empty url');
-                finalUrl = data.url;
+                finalUrl = data。url;
             } catch(e1) {
                 try {
                     const res2 = await Promise.race([
@@ -268,7 +268,7 @@ export default {
             { "name": "Proton", "url": "https://account.proton.me/", "icon": "/api/icon?domain=account.proton.me" },
             { "name": "Outlook", "url": "https://outlook.live.com/", "icon": "/api/icon?domain=outlook.live.com" },
             { "name": "临时邮箱-01", "url": "https://etempmail.com/", "icon": "https://q6.itc.cn/q_70/images03/20241020/43689ec6ab4145ed92eca37bb9529c64.jpeg" },
-            { "name": "临时邮箱-02", "url": "https://mail.td/zh", "icon": "/api/icon?domain=mail.td" },
+            { "name": "临时邮箱-02", "url": "https://smail.pw/zh", "icon": "/api/icon?domain=smail.pw" },
             { "name": "CF", "url": "https://www.cloudflare.com/zh-cn/", "icon": "/api/icon?domain=www.cloudflare.com" },
             { "name": "腾讯云-Edge", "url": "https://console.tencentcloud.com/edgeone", "icon": "/api/icon?domain=console.tencentcloud.com" },
             { "name": "Cloudns", "url": "https://www.cloudns.net/", "icon": "/api/icon?domain=www.cloudns.net" },
