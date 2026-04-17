@@ -237,7 +237,7 @@ export default {
     if (!userConfig) {
       // 默认配置区域：
       userConfig = {
-        "bg": "https://cdn4.winhlb.com/2026/03/18/69b98efca79c6.jpg",
+        "bg": "https://cdn4.winhlb.com/2026/04/17/69e1ee22e4dc9.jpg",
         "bgType": "url",
         "geo": { "name": "北京市", "lat": 39.9075, "lng": 116.39723 },
         
