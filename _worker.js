@@ -237,7 +237,7 @@ export default {
     if (!userConfig) {
       // 默认配置区域：
       userConfig = {
-        "bg": "https://pic.luck888.cc.cd/cs.jpg",
+        "bg": "https://mypic.isgod.eu.cc/cs.jpg",
         "bgType": "url",
         "geo": { "name": "北京市", "lat": 39.9075, "lng": 116.39723 },
         
