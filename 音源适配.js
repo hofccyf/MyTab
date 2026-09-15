@@ -6,8 +6,8 @@
  * 部署步骤：
  *   1. Cloudflare 控制台 → Workers & Pages → Create → 粘贴本文件
  *   2. Settings → Variables → KV Namespace Bindings → 变量名填 LX_CACHE → 关联一个新建的 KV
- *   3. （可选）绑定自定义域名（推荐，避免 workers.dev 域名被墙）
- *   4. 把这个 Worker 的访问地址填到 mytab.js 设置面板「洛雪 API 地址」里
+ *   3. （可选）绑定自定义域名（推荐，避免 workers.dev 域名被墙），如果作为mytab项目的音乐API，直接使用workers.dev域名即可
+ *   4. 把这个 Worker 的访问地址填到 mytab项目的设置面板「洛雪 API 地址」里
  *
  * 对外协议（LX Music 兼容）：
  *   GET /search?source={kw|tx|wy|mg}&keyword=&count=
@@ -23,9 +23,11 @@
  *   gdstudio → injahow meting → i-meto meting → 网易云官方搜索/直链
  *   全部失败时返回空，mytab 端会显示"加载失败"提示。
  *
- * 缓存策略：
+ * 缓存策略（v1.1 优化）：
  *   - /search 缓存 1 分钟（命中后做随机洗牌，每次刷新都能看到不同顺序）
- *   - /url    缓存 10 分钟（播放链接通常稳定，但偶尔会失效需要刷新）
+ *   - /url    缓存 3 分钟（缩短 TTL，避免缓存到已失效的 URL）
+ *              + 命中后做 HEAD 健康检查，失效则跳过缓存重新取
+ *              + 失败也缓存 30 秒（避免短时频繁敲打上游）
  *   - /pic    缓存 24 小时（封面几乎不变）
  *
  * 注意：LX 子源标识 kw/tx/wy/mg 在本适配器内部映射为：
@@ -186,7 +188,17 @@ async function handleUrl(url, env) {
 
     const cacheKey = `url:${lxSource}:${id}:${quality}`;
     const cached = await cacheGet(env, cacheKey);
-    if (cached && cached.url) return jsonOk(cached);
+
+    // 缓存命中后做健康检查，确保 URL 还有效
+    if (cached && cached.url) {
+        const stillValid = await isUrlAlive(cached.url);
+        if (stillValid) {
+            return jsonOk(cached);
+        }
+        // URL 已失效，删掉旧缓存继续重新获取
+        try { await env.LX_CACHE.delete('lx:' + cacheKey); } catch (e) {}
+        console.log(`[lx-api-adapter] cached URL expired, refetching: ${id}`);
+    }
 
     const gdSource = mapSource(lxSource);
     let finalUrl = '';
@@ -244,20 +256,54 @@ async function handleUrl(url, env) {
 
     // ---- 链路 4: 网易云直链 (仅当 source 是 netease 才兜底) ----
     if (!finalUrl && gdSource === 'netease' && /^\d+$/.test(id)) {
-        finalUrl = `https://music.163.com/song/media/outer/url?id=${id}.mp3`;
+        const directUrl = `https://music.163.com/song/media/outer/url?id=${id}.mp3`;
+        // 健康检查网易云直链（避免返回已失效的 404 重定向）
+        if (await isUrlAlive(directUrl)) {
+            finalUrl = directUrl;
+        } else {
+            failReasons.push(`netease direct: 404 (song offline or VIP only)`);
+        }
     }
 
-    // 如果所有链路都失败，记录详细原因到日志（方便排查）
+    // 如果所有链路都失败，记录详细原因到日志
     if (!finalUrl) {
         console.warn(`[lx-api-adapter] /url failed for source=${lxSource} id=${id}: ${failReasons.join(' | ')}`);
-        const payload = { url: '', source: lxSource, quality, _debug: failReasons };
-        // 失败不缓存，下次还会重试
-        return jsonOk(payload);
+        // 失败也缓存 30 秒，避免短时频繁重试敲打上游
+        // 30 秒后自动过期，重新尝试
+        await cacheSet(env, cacheKey, { url: '', source: lxSource, quality, _debug: failReasons }, 30);
+        return jsonOk({ url: '', source: lxSource, quality, _debug: failReasons });
     }
 
     const payload = { url: finalUrl, source: lxSource, quality };
-    await cacheSet(env, cacheKey, payload, 600); // 10 分钟
+    await cacheSet(env, cacheKey, payload, 180); // 3 分钟（缩短 TTL，避开 URL 失效）
     return jsonOk(payload);
+}
+
+// ============== URL 健康检查 ==============
+// 通过 HEAD 请求验证 URL 是否还能访问
+// 处理 302 重定向到 404 的情况（网易云直链的常见失败模式）
+async function isUrlAlive(url) {
+    try {
+        const res = await fetchWithTimeout(url,
+            { method: 'HEAD', redirect: 'manual', headers: { 'User-Agent': 'Mozilla/5.0' } },
+            4000
+        );
+        // 200 = 直接可用
+        if (res.status === 200) return true;
+        // 302 = 看重定向到哪里
+        if (res.status === 301 || res.status === 302 || res.status === 307 || res.status === 308) {
+            const location = res.headers.get('location') || '';
+            // 重定向到 404 页面 = 失效
+            if (location.includes('/404') || location.includes('error')) return false;
+            // 重定向到其他 CDN = 可用
+            return true;
+        }
+        // 其他状态码（403/404/5xx）= 不可用
+        return false;
+    } catch (e) {
+        // 网络错误、超时 = 视为不可用
+        return false;
+    }
 }
 
 // ============== /pic 实现 ==============
